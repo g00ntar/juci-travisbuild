@@ -9,8 +9,8 @@ env:
     - SDK_URL=https://downloads.openwrt.org/chaos_calmer
     - SDK_VERSION=15.05.1
   matrix:
-    - SDK_PACKAGE=/x86/generic/OpenWrt-SDK-15.05.1-x86-generic_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64.tar.bz2
-    - SDK_PACKAGE=/brcm2708/bcm2708/OpenWrt-SDK-15.05.1-brcm2708-bcm2708_gcc-4.8-linaro_uClibc-0.9.33.2_eabi.Linux-x86_64.tar.bz2
+    - SDK_PACKAGE=x86/generic/OpenWrt-SDK-15.05.1-x86-generic_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64.tar.bz2
+    - SDK_PACKAGE=brcm2708/bcm2708/OpenWrt-SDK-15.05.1-brcm2708-bcm2708_gcc-4.8-linaro_uClibc-0.9.33.2_eabi.Linux-x86_64.tar.bz2
     - SDK_PACKAGE=ar71xx/generic/OpenWrt-SDK-15.05.1-ar71xx-generic_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64.tar.bz2
     - SDK_PACKAGE=brcm63xx/generic/OpenWrt-SDK-15.05.1-brcm63xx-generic_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64.tar.bz2
     - SDK_PACKAGE=kirkwood/generic/OpenWrt-SDK-15.05.1-kirkwood_gcc-4.8-linaro_uClibc-0.9.33.2_eabi.Linux-x86_64.tar.bz2
@@ -63,8 +63,7 @@ before_deploy:
 deploy:
   provider: releases
   api_key:
-    secure: Tz41PfqMRatFzIJPMb7INLrFxM4hxwYvOqkWj29HJGfh3cLaoLVqU3HZDKEGopd/6f6WIrQ6UdFyJASY79Z3IRS7HEllAQbNufR11RrSAB/toB7tO76csBhhxgZ4UhKPhSBVy66eKmBCttfC3vO5+dz0gkMKZk3ELPDUGJVdoFDTIVxGeaceC1kMGwcVjW6AyoPvIN7toCj7avRepefGl/3iNvr4pSH5f2ZJXZkVXK4jzYyKFaRT2tktQmSRYXQ/+jhybX/N+UPmxKP8YLrJ2u1lgbf0hxCIXB7QS4LnS4kewsvMo7fdZ0cIC59JQfXuB056u6N2r8iKXQOuTA3Uq9E3YVKrlHAmXxFCbkBczAox36sDrx8f5buinFXhQ4dczrWNkGQQmCSf9nuVYIL/hofcvKN58vH5FktHPMyWV8d6AiycPxZAh7OnZsQEqmNQUJzZxl/dP1FXn+GbIAKNMezdGm7uobpvT772rFlIympTTTOTBHr+GzJ1q6QkBmsGIsAP9lg+XjM3iFd2IYPeTcyrO2fjK8MJFRuYeG2g0Dk3PPOVfdJErziQFcQWZF0/wSGBNNKm11443S9bNhwriz9phuWEDFs/suHaV7N5wuNDAm4cSCHVuPOIhrQPTiXwxA5ytDs6kGsqmc9Va/V+80mdn0sRWUZkbX4ZKxmzcy0=
-  skip_cleanup: true
+    secure: o88MVMgwQQtcVCvv4fhksxStgGNO6eoPZpsgfaFaCoz2DDx1sm5aVcZ1AHEgSZ1b7vF50uiQRO+Ov/s13kNaKdks1aL9ph755tIUTImo3nOcq6TxAE13Wi+vpcPmtK4YJIitvru9Rzy/MDIxghBtzn7AsaOWDqsXqBBeZwwuFMCs1WkjNul2z9+z4mmjTarG8GDcaesSkAYeBDBIV+G+l5HPBCxSHa1Jn3pySeovZG2SA0kVPUGO8UeXr7USN75v7pJqEQ8LAUwJC2Pj6f6XLZmALYAg7fbDngu75CTij0zEB0j1vTEcUOrWyPMBoimfvDCsbKJdbBSWVSEdu1GoGo+eiG2+029vzT5lr7mbPNOsTW7O9dBM2WnH1ujccpUcquNkQnKduGQFfucW8TTHQLe0znp5Q0bBxcRBMjTcvSQvL5rfF2W6BzSqKeGtna0ts9SbEo7EPoA1yL88DpQAv/MZb4BNixTiuFsfjGoCA59EPnIn28xxZARd7eud4bFu8nBM8GBYX+7vlmWZt6kkUpWza5GjN9ai0Yy8KzQnJgB++zrUT/Otxel7qFIqjE9jj6jxBcKAR8fH6U55zd1NkdtqaVzlyw/434bx9C2I4DYYbAcqv76CnWj1C+v08sau9JSNB44Iv+VKyxaiFvAcys3JBWUxtyDIeEcLXf/rRJQ=
   file_glob: true
   file: $TRAVIS_BUILD_DIR/juci-$PKG.zip
   on:
