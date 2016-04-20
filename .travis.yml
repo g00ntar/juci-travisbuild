@@ -1,0 +1,72 @@
+sudo: true
+notifications:
+  email: false
+language: c
+compiler: gcc
+env:
+  global:
+    - PACKAGE=juci
+    - SDK_URL=https://downloads.openwrt.org/chaos_calmer
+    - SDK_VERSION=15.05.1
+  matrix:
+    - SDK_PACKAGE=/x86/generic/OpenWrt-SDK-15.05.1-x86-generic_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64.tar.bz2
+    - SDK_PACKAGE=/brcm2708/bcm2708/OpenWrt-SDK-15.05.1-brcm2708-bcm2708_gcc-4.8-linaro_uClibc-0.9.33.2_eabi.Linux-x86_64.tar.bz2
+    - SDK_PACKAGE=ar71xx/generic/OpenWrt-SDK-15.05.1-ar71xx-generic_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64.tar.bz2
+    - SDK_PACKAGE=brcm63xx/generic/OpenWrt-SDK-15.05.1-brcm63xx-generic_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64.tar.bz2
+    - SDK_PACKAGE=kirkwood/generic/OpenWrt-SDK-15.05.1-kirkwood_gcc-4.8-linaro_uClibc-0.9.33.2_eabi.Linux-x86_64.tar.bz2
+    - SDK_PACKAGE=lantiq/xrx200/OpenWrt-SDK-15.05.1-lantiq-xrx200_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64.tar.bz2
+    - SDK_PACKAGE=ramips/mt7620/OpenWrt-SDK-15.05.1-ramips-mt7620_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64.tar.bz2
+    - SDK_PACKAGE=ramips/mt7621/OpenWrt-SDK-15.05.1-ramips-mt7621_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64.tar.bz2
+    - SDK_PACKAGE=ramips/mt7628/OpenWrt-SDK-15.05.1-ramips-mt7628_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64.tar.bz2
+    - SDK_PACKAGE=ramips/mt7688/OpenWrt-SDK-15.05.1-ramips-mt7688_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64.tar.bz2
+    - SDK_PACKAGE=ramips/rt288x/OpenWrt-SDK-15.05.1-ramips-rt288x_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64.tar.bz2
+    - SDK_PACKAGE=ramips/rt305x/OpenWrt-SDK-15.05.1-ramips-rt305x_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64.tar.bz2
+    - SDK_PACKAGE=ramips/rt3883/OpenWrt-SDK-15.05.1-ramips-rt3883_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64.tar.bz2
+install:
+- export PKG=`echo $SDK_PACKAGE | awk '{split($0,a,"/"); print a[1] "-" a[2]}'`
+- echo Build for $PKG
+- sudo apt-get -y install npm nodejs yui-compressor lessc
+- npm install -g grunt-cli
+- npm install -g mocha 
+- npm install -g bower 
+- npm install -g uglify-js
+- npm install -g less
+- which yui-compressor
+- which lessc
+- mkdir -p $TRAVIS_BUILD_DIR/local ; cd $TRAVIS_BUILD_DIR/local
+- wget "http://us.archive.ubuntu.com/ubuntu/pool/main/c/ccache/ccache_3.1.6-1_amd64.deb"
+- dpkg -x *.deb .
+- mkdir -p $TRAVIS_BUILD_DIR/cache ; cd $TRAVIS_BUILD_DIR/cache
+- wget -c $SDK_URL/$SDK_VERSION/$SDK_PACKAGE
+- mkdir -p $TRAVIS_BUILD_DIR/sdk ; cd $TRAVIS_BUILD_DIR/sdk
+- export FILE=$TRAVIS_BUILD_DIR/cache/$(basename $SDK_PACKAGE)
+- file $FILE
+- tar xjf $FILE
+- cd $TRAVIS_BUILD_DIR/sdk/OpenWrt-SDK-*
+- sed -i 's/^src-git luci/#src-git luci/g' feeds.conf.default
+- sed -i 's/^src-git telephony/#src-git telephony/g' feeds.conf.default
+- echo "src-git-full juci https://github.com/mkschreder/juci-openwrt-feed.git" >> feeds.conf.default
+- export PATH=$TRAVIS_BUILD_DIR/local/usr/bin:$PATH
+- ./scripts/feeds update >/dev/null
+- ./scripts/feeds install -f -p juci -a
+- make package/juci/download
+- make package/juci/prepare
+- cd build_dir/target-*/juci-*
+- npm install
+script:
+- cd $TRAVIS_BUILD_DIR/sdk/OpenWrt-SDK-*
+- make -j5
+- find . -name '*.ipk' -exec cp {} $TRAVIS_BUILD_DIR \;
+- zip $TRAVIS_BUILD_DIR/juci-$PKG.zip $TRAVIS_BUILD_DIR/*.ipk
+before_deploy:
+  git fetch --tags
+deploy:
+  provider: releases
+  api_key:
+    secure: Tz41PfqMRatFzIJPMb7INLrFxM4hxwYvOqkWj29HJGfh3cLaoLVqU3HZDKEGopd/6f6WIrQ6UdFyJASY79Z3IRS7HEllAQbNufR11RrSAB/toB7tO76csBhhxgZ4UhKPhSBVy66eKmBCttfC3vO5+dz0gkMKZk3ELPDUGJVdoFDTIVxGeaceC1kMGwcVjW6AyoPvIN7toCj7avRepefGl/3iNvr4pSH5f2ZJXZkVXK4jzYyKFaRT2tktQmSRYXQ/+jhybX/N+UPmxKP8YLrJ2u1lgbf0hxCIXB7QS4LnS4kewsvMo7fdZ0cIC59JQfXuB056u6N2r8iKXQOuTA3Uq9E3YVKrlHAmXxFCbkBczAox36sDrx8f5buinFXhQ4dczrWNkGQQmCSf9nuVYIL/hofcvKN58vH5FktHPMyWV8d6AiycPxZAh7OnZsQEqmNQUJzZxl/dP1FXn+GbIAKNMezdGm7uobpvT772rFlIympTTTOTBHr+GzJ1q6QkBmsGIsAP9lg+XjM3iFd2IYPeTcyrO2fjK8MJFRuYeG2g0Dk3PPOVfdJErziQFcQWZF0/wSGBNNKm11443S9bNhwriz9phuWEDFs/suHaV7N5wuNDAm4cSCHVuPOIhrQPTiXwxA5ytDs6kGsqmc9Va/V+80mdn0sRWUZkbX4ZKxmzcy0=
+  skip_cleanup: true
+  file_glob: true
+  file: $TRAVIS_BUILD_DIR/juci-$PKG.zip
+  on:
+    tags: true
+    all_branches: true
